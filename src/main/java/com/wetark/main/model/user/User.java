@@ -27,6 +27,14 @@ public class User extends Base {
 
 	@NotBlank
 	@Size(max = 20)
+	private String firstName;
+
+	@NotBlank
+	@Size(max = 20)
+	private String lastName;
+
+	@NotBlank
+	@Size(max = 20)
 	private String username;
 
 	@NotBlank
@@ -47,10 +55,28 @@ public class User extends Base {
 	public User() {
 	}
 
-	public User(String username, String email, String password) {
+	public User(String firstName, String lastName, String username, String email, String password) {
+		this.firstName = firstName;
+		this.lastName = lastName;
 		this.username = username;
 		this.email = email;
 		this.password = password;
+	}
+
+	public String getFirstName() {
+		return firstName;
+	}
+
+	public void setFirstName(String firstName) {
+		this.firstName = firstName;
+	}
+
+	public String getLastName() {
+		return lastName;
+	}
+
+	public void setLastName(String lastName) {
+		this.lastName = lastName;
 	}
 
 	public String getId() {
