@@ -33,7 +33,7 @@ public class Trade extends Base {
     private User user;
 
     @JsonIgnore
-    @OneToOne
+    @OneToOne(cascade=CascadeType.REMOVE)
     @NotNull
     private Event event;
 
