@@ -4,38 +4,37 @@ import com.wetark.main.model.Base;
 import com.wetark.main.model.event.Event;
 import com.wetark.main.model.trade.Trade;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.OneToOne;
-import javax.persistence.Table;
-import javax.validation.constraints.NotBlank;
+import javax.persistence.*;
+import javax.validation.constraints.NotNull;
 import java.math.BigDecimal;
 
 @Entity
 @Table(	name = "matched_trade")
-public class MatchedTrade  extends Base {
+public class MatchedTrade extends Base {
 
-    @OneToOne
-    @NotBlank
+    @ManyToOne()
+    @JoinColumn(name="event_id")
     private Event event;
 
     @OneToOne
-    @NotBlank
+    @NotNull
     private Trade yesTrade;
 
     @OneToOne
-    @NotBlank
+    @NotNull
     private Trade noTrade;
 
-    private BigDecimal size = BigDecimal.ONE;
-
-    public Event getEvent() {
-        return event;
+    public MatchedTrade() {
     }
 
-    public void setEvent(Event event) {
+    public MatchedTrade(Event event, Trade yesTrade, Trade noTrade, BigDecimal size) {
         this.event = event;
+        this.yesTrade = yesTrade;
+        this.noTrade = noTrade;
+        this.size = size;
     }
+
+    private BigDecimal size = BigDecimal.ONE;
 
     public Trade getYesTrade() {
         return yesTrade;

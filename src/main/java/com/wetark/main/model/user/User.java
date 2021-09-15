@@ -1,5 +1,6 @@
 package com.wetark.main.model.user;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.wetark.main.model.Base;
 import com.wetark.main.model.user.role.Role;
 import org.hibernate.annotations.GenericGenerator;
@@ -42,10 +43,12 @@ public class User extends Base {
 	@Email
 	private String email;
 
+	@JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
 	@NotBlank
 	@Size(max = 120)
 	private String password;
 
+	@JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
 	@ManyToMany(fetch = FetchType.LAZY)
 	@JoinTable(	name = "user_roles", 
 				joinColumns = @JoinColumn(name = "user_id"), 

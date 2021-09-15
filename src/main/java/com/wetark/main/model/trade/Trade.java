@@ -1,15 +1,13 @@
 package com.wetark.main.model.trade;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.wetark.main.model.Base;
 import com.wetark.main.model.event.Event;
 import com.wetark.main.model.user.User;
 import org.hibernate.annotations.GenericGenerator;
 
 import javax.persistence.*;
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Size;
 
 import java.math.BigDecimal;
 
@@ -34,6 +32,7 @@ public class Trade extends Base {
     @NotNull
     private User user;
 
+    @JsonIgnore
     @OneToOne
     @NotNull
     private Event event;

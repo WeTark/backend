@@ -18,8 +18,8 @@ public class TradeRequest {
     @NotBlank
     private BigDecimal size;
 
-    @NotBlank
-    private String user_id;
+//    @NotBlank
+//    private String user_id;
 
     @NotBlank
     private String event_id;
@@ -32,13 +32,13 @@ public class TradeRequest {
         this.tradeType = tradeType;
     }
 
-    public String getUser_id() {
-        return user_id;
-    }
-
-    public void setUser_id(String user_id) {
-        this.user_id = user_id;
-    }
+//    public String getUser_id() {
+//        return user_id;
+//    }
+//
+//    public void setUser_id(String user_id) {
+//        this.user_id = user_id;
+//    }
 
     public String getEvent_id() {
         return event_id;

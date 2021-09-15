@@ -13,6 +13,7 @@ import com.wetark.main.security.jwt.JwtUtils;
 import com.wetark.main.security.services.UserDetailsImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -133,4 +134,11 @@ public class AuthController {
 				roleList
 				));
 	}
+
+	@GetMapping("/me")
+	@PreAuthorize("hasRole('USER')")
+	public User getUser(){
+		return ((UserDetailsImpl)SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getUser();
+	}
+
 }
