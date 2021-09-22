@@ -3,25 +3,27 @@ package com.wetark.main.model.event;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.wetark.main.model.Base;
 import com.wetark.main.model.matchedTrade.MatchedTrade;
+import com.wetark.main.model.user.User;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.GenericGenerator;
+import org.hibernate.annotations.Type;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Set;
+import java.text.MessageFormat;
+import java.util.*;
 
 import static com.wetark.main.helper.UUIDGenerator.generatorName;
 
 @Entity
-@Table(	name = "event",
-        uniqueConstraints = {
-                @UniqueConstraint(columnNames = "title")
-        })
+@Table(	name = "event"
+//        uniqueConstraints = {
+//                @UniqueConstraint(columnNames = "title")
+//        }
+        )
 public class Event extends Base {
     @Id
     @GeneratedValue(generator = generatorName)
@@ -38,6 +40,9 @@ public class Event extends Base {
     @ElementCollection
     private List<String> tags = new ArrayList<>();
 
+    @JsonIgnore
+    @ManyToMany(cascade = CascadeType.ALL)
+    private Map<String, EventVariable> eventVariableMap  = new HashMap<String, EventVariable>();
 
     private BigDecimal yesPrice = BigDecimal.valueOf(5);
     private BigDecimal noPrice = BigDecimal.valueOf(5);
@@ -46,8 +51,26 @@ public class Event extends Base {
     @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
     private Set<MatchedTrade> matchedTrade;
 
+    @JsonIgnore
+    @OneToOne
+    private User user;
+
+    private Boolean isPrivate = false;
+
+    @Column(nullable = true)
+    private String picture;
+
     @Temporal(TemporalType.TIMESTAMP)
     public Date expireAt;
+
+    public Date createdAt;
+
+    public Date getCreatedAt() {
+        return createdAt;
+    }
+    public void setCreatedAt(Date createdAt) {
+        super.setCreatedAt(createdAt);
+    }
 
     @Override
     public String getId() {
@@ -57,6 +80,14 @@ public class Event extends Base {
     @Override
     public void setId(String id) {
         this.id = id;
+    }
+
+    public Map<String, EventVariable> getEventVariableMap() {
+        return eventVariableMap;
+    }
+
+    public void setEventVariableMap(Map<String, EventVariable> eventVariableMap) {
+        this.eventVariableMap = eventVariableMap;
     }
 
     public BigDecimal getYesPrice() {
@@ -83,9 +114,18 @@ public class Event extends Base {
         this.matchedTrade = matchedTrade;
     }
 
-    public String getTitle() {
-        return title;
+    public String titleWithVariable() {
+        return this.title;
     }
+
+    public String getTitle() {
+        this.eventVariableMap.keySet().forEach(key->{
+            this.title = this.title.replaceAll("\\$"+key+"\\$", eventVariableMap.get(key).getValue());
+        });
+        return this.title;
+    }
+
+
 
     public void setTitle(String title) {
         this.title = title;
@@ -113,5 +153,29 @@ public class Event extends Base {
 
     public void setExpireAt(Date expireAt) {
         this.expireAt = expireAt;
+    }
+
+    public User getUser() {
+        return user;
+    }
+
+    public void setUser(User user) {
+        this.user = user;
+    }
+
+    public Boolean getPrivate() {
+        return isPrivate;
+    }
+
+    public void setPrivate(Boolean aPrivate) {
+        isPrivate = aPrivate;
+    }
+
+    public String getPicture() {
+        return picture;
+    }
+
+    public void setPicture(String picture) {
+        this.picture = picture;
     }
 }

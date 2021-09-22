@@ -16,7 +16,7 @@ public class TradeRequest {
     private BigDecimal price;
 
     @NotBlank
-    private BigDecimal size;
+    private BigDecimal initialSize;
 
 //    @NotBlank
 //    private String user_id;
@@ -56,19 +56,20 @@ public class TradeRequest {
         this.price = price;
     }
 
-    public BigDecimal getSize() {
-        return size;
+    public BigDecimal getInitialSize() {
+        return initialSize;
     }
 
-    public void setSize(BigDecimal size) {
-        this.size = size;
+    public void setInitialSize(BigDecimal initialSize) {
+        this.initialSize = initialSize;
     }
 
     public Trade newTrade(User user, Event event) {
         Trade trade = new Trade();
         trade.setTradeType(this.tradeType);
         trade.setPrice(this.price);
-        trade.setSize(this.size);
+        trade.setInitialSize(this.initialSize);
+        trade.setSize(this.initialSize);
         trade.setUser(user);
         trade.setEvent(event);
         return trade;

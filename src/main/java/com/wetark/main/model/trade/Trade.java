@@ -26,6 +26,8 @@ public class Trade extends Base {
     private TradeType tradeType;
 
     private BigDecimal price;
+
+    private BigDecimal initialSize;
     private BigDecimal size;
 
     @OneToOne
@@ -47,6 +49,14 @@ public class Trade extends Base {
     @Override
     public void setId(String id) {
         this.id = id;
+    }
+
+    public BigDecimal getInitialSize() {
+        return initialSize;
+    }
+
+    public void setInitialSize(BigDecimal initialSize) {
+        this.initialSize = initialSize;
     }
 
     public TradeType getTradeType() {

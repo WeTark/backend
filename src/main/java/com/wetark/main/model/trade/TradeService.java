@@ -11,6 +11,9 @@ import com.wetark.main.model.user.User;
 import com.wetark.main.model.user.UserRepository;
 import com.wetark.main.payload.request.TradeRequest;
 import com.wetark.main.payload.response.PendingTradeResponse;
+import com.wetark.main.payload.response.userPortfolio.UserPortfolio;
+import com.wetark.main.payload.response.userPortfolio.UserPortfolioAmount;
+import com.wetark.main.payload.response.userPortfolio.UserPortfolioResponse;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -27,6 +30,18 @@ public class TradeService extends BaseService<Trade> {
         this.tradeRepository = tradeRepository;
         this.eventRepository = eventRepository;
         this.userRepository = userRepository;
+    }
+
+    public List<UserPortfolioResponse> userPortfolio(User user){
+        List<UserPortfolio> userPortfolioList = tradeRepository.findUserPortfolioByUser(user);
+        Map<String, UserPortfolioResponse> userPortfolioResponseMap= new HashMap<>();
+        userPortfolioList.forEach(userPortfolio -> {
+            userPortfolioResponseMap.putIfAbsent(userPortfolio.getId(), new UserPortfolioResponse(userPortfolio));
+            userPortfolioResponseMap.get(
+                    userPortfolio.getId()).getAmount().put(userPortfolio.getTradeType(),
+                    new UserPortfolioAmount(userPortfolio.getTotalAmount(), userPortfolio.getTotalPendingAmount()));
+        });
+        return new ArrayList<>(userPortfolioResponseMap.values());
     }
 
     public Map<String,  List<PendingTradeResponse>> topPendingTrade(String eventId, String page, String size) throws CustomException {

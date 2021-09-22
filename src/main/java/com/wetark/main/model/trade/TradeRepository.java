@@ -4,6 +4,7 @@ import com.wetark.main.model.BaseRepository;
 import com.wetark.main.model.event.Event;
 import com.wetark.main.model.user.User;
 import com.wetark.main.payload.response.PendingTradeResponse;
+import com.wetark.main.payload.response.userPortfolio.UserPortfolio;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -24,4 +25,7 @@ public interface TradeRepository extends BaseRepository<Trade> {
     List<Trade> findByUserAndEventAndIsActiveOrderByCreatedAtDesc(User user,Event event, Boolean isActive, Pageable pageable);
 
     List<Trade> findByIsActive(Boolean isActive);
+
+    @Query("Select trd.event.id as id, trd.event.title as title, trd.tradeType as tradeType, MAX(trd.event.createdAt) as createdAt, max(trd.event.expireAt) as expireAt, SUM(trd.price*(trd.initialSize-trd.size)) as totalAmount, SUM(trd.price*trd.size) as totalPendingAmount from Trade trd group by trd.event.id, trd.tradeType, trd.event.title")
+    List<UserPortfolio> findUserPortfolioByUser(@Param("user") User user);
 }

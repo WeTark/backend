@@ -27,15 +27,15 @@ public class User extends Base {
 	private String id;
 
 	@NotBlank
-	@Size(max = 20)
+	@Size(max = 30)
 	private String firstName;
 
 	@NotBlank
-	@Size(max = 20)
+	@Size(max = 30)
 	private String lastName;
 
 	@NotBlank
-	@Size(max = 20)
+	@Size(max = 50)
 	private String username;
 
 	@NotBlank

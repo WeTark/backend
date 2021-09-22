@@ -39,6 +39,7 @@ public class TradeController{
         return tradeService.topPendingTrade(eventId, page, size);
     }
 
+
 //    @GetMapping("/pending/user")
 //    @PreAuthorize("hasRole('USER')")
 //    public List<Trade> fetchUserPendingPendingTradeForEvent(@RequestParam String eventId, @RequestParam String page,@RequestParam String size) throws CustomException {
