@@ -1,5 +1,6 @@
 package com.wetark.main.payload.response.userPortfolio;
 
+import com.wetark.main.model.event.Event;
 import com.wetark.main.model.trade.TradeType;
 
 import java.math.BigDecimal;
@@ -15,12 +16,12 @@ public class UserPortfolioResponse {
     private Date createdAt;
     private Date expireAt;
 
-    public UserPortfolioResponse(UserPortfolio userPortfolio) {
+    public UserPortfolioResponse(UserPortfolio userPortfolio, Event event) {
         this.id = userPortfolio.getId();
-        this.title = userPortfolio.getTitle();
-        this.picture = userPortfolio.getPicture();
-        this.createdAt = userPortfolio.getCreatedAt();
-        this.expireAt = userPortfolio.getExpireAt();
+        this.title = event.getTitle();
+        this.picture = event.getPicture();
+        this.createdAt = event.getCreatedAt();
+        this.expireAt = event.getExpireAt();
         this.amount = new HashMap<>();
     }
 

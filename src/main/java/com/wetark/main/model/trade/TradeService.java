@@ -36,7 +36,7 @@ public class TradeService extends BaseService<Trade> {
         List<UserPortfolio> userPortfolioList = tradeRepository.findUserPortfolioByUser(user);
         Map<String, UserPortfolioResponse> userPortfolioResponseMap= new HashMap<>();
         userPortfolioList.forEach(userPortfolio -> {
-            userPortfolioResponseMap.putIfAbsent(userPortfolio.getId(), new UserPortfolioResponse(userPortfolio));
+            userPortfolioResponseMap.putIfAbsent(userPortfolio.getId(), new UserPortfolioResponse(userPortfolio, eventRepository.findById(userPortfolio.getId()).get()));
             userPortfolioResponseMap.get(
                     userPortfolio.getId()).getAmount().put(userPortfolio.getTradeType(),
                     new UserPortfolioAmount(userPortfolio.getTotalAmount(), userPortfolio.getTotalPendingAmount()));

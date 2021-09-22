@@ -7,11 +7,6 @@ import java.util.Date;
 
 public interface UserPortfolio {
     public String getId();
-    public String getTitle();
-    public String getPicture();
-    public Date getCreatedAt();
-    public Date getExpireAt();
-
     public TradeType getTradeType();
     public BigDecimal getTotalAmount();
     public BigDecimal getTotalPendingAmount();
