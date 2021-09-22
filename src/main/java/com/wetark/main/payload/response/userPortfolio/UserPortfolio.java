@@ -8,6 +8,7 @@ import java.util.Date;
 public interface UserPortfolio {
     public String getId();
     public String getTitle();
+    public String getPicture();
     public Date getCreatedAt();
     public Date getExpireAt();
 

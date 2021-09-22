@@ -10,6 +10,7 @@ import java.util.Map;
 public class UserPortfolioResponse {
     private String id;
     private String title;
+    private String picture;
     private Map<TradeType, UserPortfolioAmount> amount;
     private Date createdAt;
     private Date expireAt;
@@ -17,6 +18,7 @@ public class UserPortfolioResponse {
     public UserPortfolioResponse(UserPortfolio userPortfolio) {
         this.id = userPortfolio.getId();
         this.title = userPortfolio.getTitle();
+        this.picture = userPortfolio.getPicture();
         this.createdAt = userPortfolio.getCreatedAt();
         this.expireAt = userPortfolio.getExpireAt();
         this.amount = new HashMap<>();
@@ -60,5 +62,13 @@ public class UserPortfolioResponse {
 
     public void setExpireAt(Date expireAt) {
         this.expireAt = expireAt;
+    }
+
+    public String getPicture() {
+        return picture;
+    }
+
+    public void setPicture(String picture) {
+        this.picture = picture;
     }
 }
