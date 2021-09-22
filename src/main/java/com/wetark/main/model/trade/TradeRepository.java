@@ -26,6 +26,6 @@ public interface TradeRepository extends BaseRepository<Trade> {
 
     List<Trade> findByIsActive(Boolean isActive);
 
-    @Query("Select trd.event.id as id, trd.event.title as title, trd.tradeType as tradeType, MAX(trd.event.createdAt) as createdAt, max(trd.event.expireAt) as expireAt, SUM(trd.price*(trd.initialSize-trd.size)) as totalAmount, SUM(trd.price*trd.size) as totalPendingAmount from Trade trd group by trd.event.id, trd.tradeType, trd.event.title")
+    @Query("Select trd.event.id as id, trd.event.title as title, trd.tradeType as tradeType, MAX(trd.event.createdAt) as createdAt, max(trd.event.expireAt) as expireAt, SUM(trd.price*(trd.initialSize-trd.size)) as totalAmount, SUM(trd.price*trd.size) as totalPendingAmount from Trade trd where trd.user = :user group by trd.event.id, trd.tradeType, trd.event.title")
     List<UserPortfolio> findUserPortfolioByUser(@Param("user") User user);
 }
