@@ -13,6 +13,7 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.time.Duration;
 import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -54,7 +55,7 @@ public class MatchedTradeService {
             graphData.put(createdAt, graphData.get(createdAt).add(matchedTrade.getYesTrade().getPrice()));
         }
         BigDecimal yesValue = BigDecimal.valueOf(5);
-        for (Instant date = dateAfter; !date.isAfter(startDate); date = date.plus(Duration.ofDays(1)))
+        for (Instant date = dateAfter; !date.truncatedTo(ChronoUnit.DAYS).isAfter(startDate.truncatedTo(ChronoUnit.DAYS)); date = date.plus(Duration.ofDays(1)))
         {
             String createdAt = formatter.format(Date.from(date));
             graphData.putIfAbsent(createdAt, yesValue);
