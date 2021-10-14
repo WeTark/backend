@@ -3,6 +3,7 @@ package com.wetark.main.controller;
 import com.wetark.main.exception.CustomException;
 import com.wetark.main.model.event.Event;
 import com.wetark.main.model.event.EventService;
+import com.wetark.main.model.event.tag.Tag;
 import com.wetark.main.model.matchedTrade.MatchedTradeService;
 import com.wetark.main.model.trade.TradeService;
 import com.wetark.main.model.user.User;
@@ -34,9 +35,8 @@ public class EventController{
     @PreAuthorize("hasRole('USER')")
     @PostMapping
     public Event add(@RequestBody EventRequest entity) {
-        return eventService.add(entity.createEvent());
+        return eventService.add(entity);
     }
-
 
     @DeleteMapping("/delete/{id}")
     @PreAuthorize("hasRole('USER')")
@@ -58,9 +58,15 @@ public class EventController{
     }
 
     @PreAuthorize("hasRole('USER')")
+    @GetMapping("/tag/all")
+    public List<Tag> findAllTag(String page, String size) throws CustomException {
+        return eventService.findAllTag(page, size);
+    }
+
+    @PreAuthorize("hasRole('USER')")
     @GetMapping("/all")
-    public List<Event> findAll(String page, String size){
-        return eventService.findAllNonPrivate(page, size);
+    public List<Event> findAll(String page, String size, @RequestParam(required = false) String tag) throws CustomException {
+        return eventService.findAllNonPrivate(page, size, tag);
     }
 
     @PreAuthorize("hasRole('USER')")

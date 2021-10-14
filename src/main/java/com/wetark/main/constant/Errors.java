@@ -7,7 +7,9 @@ public enum Errors {
     INVALID_SIDE("Invalid side. Please provide a valid input."),
     INVALID_PRICE("Invalid price. Please provide a valid input."),
     INVALID_SIZE("Invalid size. Please provide a valid input."),
-    INVALID_TIME("Invalid time. Please provie a valid input.");
+    INVALID_TIME("Invalid time. Please provie a valid input."),
+    INSUFFICIENT_BALANCE("Insufficient balance"),
+    TAG_NOT_FOUND("Please provide a valid tag");
 
     public String error;
 

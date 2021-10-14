@@ -1,7 +1,14 @@
 package com.wetark.main.model.user;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.wetark.main.model.Base;
+import com.wetark.main.model.event.Event;
+import com.wetark.main.model.matchedTrade.MatchedTrade;
+import com.wetark.main.model.user.balance.Balance;
+import com.wetark.main.model.user.notification.Notification;
+import com.wetark.main.model.user.notification.NotificationType;
+import com.wetark.main.model.user.order.Order;
 import com.wetark.main.model.user.role.Role;
 import org.hibernate.annotations.GenericGenerator;
 
@@ -9,6 +16,7 @@ import javax.persistence.*;
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Size;
+import java.math.BigDecimal;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -55,6 +63,17 @@ public class User extends Base {
 				inverseJoinColumns = @JoinColumn(name = "role_id"))
 	private Set<Role> roles = new HashSet<>();
 
+	@OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+	private Balance balance;
+
+	@JsonIgnore
+	@OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+	private Set<Order> order = new HashSet<>();
+
+	@JsonIgnore
+	@OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+	private Set<Notification> notifications = new HashSet<>();
+
 	public User() {
 	}
 
@@ -64,6 +83,30 @@ public class User extends Base {
 		this.username = username;
 		this.email = email;
 		this.password = password;
+	}
+
+	public Set<Notification> getNotifications() {
+		return notifications;
+	}
+
+	public void setNotifications(Set<Notification> notifications) {
+		this.notifications = notifications;
+	}
+
+	public Set<Order> getOrder() {
+		return order;
+	}
+
+	public void setOrder(Set<Order> order) {
+		this.order = order;
+	}
+
+	public Balance getBalance() {
+		return balance;
+	}
+
+	public void setBalance(Balance balance) {
+		this.balance = balance;
 	}
 
 	public String getFirstName() {
@@ -121,4 +164,5 @@ public class User extends Base {
 	public void setRoles(Set<Role> roles) {
 		this.roles = roles;
 	}
+
 }
