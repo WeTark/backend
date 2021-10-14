@@ -5,8 +5,11 @@ import com.wetark.main.exception.CustomException;
 import com.wetark.main.helper.FileUploadUtil;
 import com.wetark.main.helper.PageHelper;
 import com.wetark.main.model.BaseService;
+import com.wetark.main.model.event.tag.Tag;
+import com.wetark.main.model.event.tag.TagRepository;
 import com.wetark.main.model.user.User;
 import com.wetark.main.payload.request.CreatePersonalEventRequest;
+import com.wetark.main.payload.request.EventRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
@@ -16,15 +19,25 @@ import java.awt.print.Pageable;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class EventService extends BaseService<Event> {
     private final EventRepository eventRepository;
+    private final TagRepository tagRepository;
 
-    public EventService(EventRepository eventRepository) {
+    public EventService(EventRepository eventRepository, TagRepository tagRepository) {
         super(eventRepository);
         this.eventRepository = eventRepository;
+        this.tagRepository = tagRepository;
+    }
+
+    @Transactional
+    public Event add(EventRequest entity){
+        entity.setTags(entity.getTags().stream().map(tag -> tagRepository.findByNameIgnoreCase(tag.getName()).orElseGet(()->tag)).collect(Collectors.toSet()));
+        return eventRepository.save(entity.createEvent());
     }
 
     public Event addNonPrivateEvent(Event event, MultipartFile multipartFile) throws IOException {
@@ -38,8 +51,8 @@ public class EventService extends BaseService<Event> {
         return event;
     }
     @Transactional
-    public List<Event> findAllNonPrivate(String page, String size) {
-        return eventRepository.findByIsPrivateOrderByCreatedAtDesc(false, PageHelper.pageable(page, size));
+    public List<Event> findAllNonPrivate(String page, String size, String tagName) throws CustomException {
+        return eventRepository.findByTagsNameAndIsPrivateOrderByCreatedAtDesc(tagName, false, PageHelper.pageable(page, size)).getContent();
     }
 
     @Transactional
@@ -58,7 +71,7 @@ public class EventService extends BaseService<Event> {
         Event personalEvent = new Event();
         personalEvent.setTitle(event.titleWithVariable());
         personalEvent.setDescription(event.getDescription());
-        personalEvent.setTags(new ArrayList<String>(event.getTags()));
+        personalEvent.setTags(event.getTags());
         personalEvent.setPicture(event.getPicture());
         personalEvent.setExpireAt(event.expireAt);
 
@@ -67,5 +80,9 @@ public class EventService extends BaseService<Event> {
         personalEvent.setEventVariableMap(createPersonalEventRequest.getEventVariableMap());
 
         return eventRepository.save(personalEvent).getId();
+    }
+
+    public List<Tag> findAllTag(String page, String size) {
+        return tagRepository.findAll(PageHelper.pageable(page,size)).getContent();
     }
 }

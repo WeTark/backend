@@ -3,6 +3,7 @@ package com.wetark.main.payload.request;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.wetark.main.model.event.Event;
 import com.wetark.main.model.event.EventVariable;
+import com.wetark.main.model.event.tag.Tag;
 import com.wetark.main.model.matchedTrade.MatchedTrade;
 
 import javax.persistence.*;
@@ -12,7 +13,7 @@ import java.util.*;
 public class EventRequest {
     private String title;
     private String description;
-    private List<String> tags = new ArrayList<>();
+    private Set<Tag> tags;
     private Map<String, EventVariable> eventVariableMap  = new HashMap<String, EventVariable>();
     private String picture;
     public Date expireAt;
@@ -33,11 +34,11 @@ public class EventRequest {
         this.description = description;
     }
 
-    public List<String> getTags() {
+    public Set<Tag> getTags() {
         return tags;
     }
 
-    public void setTags(List<String> tags) {
+    public void setTags(Set<Tag> tags) {
         this.tags = tags;
     }
 
@@ -69,7 +70,10 @@ public class EventRequest {
         Event event = new Event();
         event.setTitle(this.title);
         event.setDescription(this.description);
-        event.setTags(this.tags);
+        event.getTags().addAll(this.tags);
+        this.tags.forEach(tag -> {
+            tag.getEvents().add(event);
+        });
         event.setEventVariableMap(this.eventVariableMap);
         event.setExpireAt(this.expireAt);
         event.setPicture(this.picture);

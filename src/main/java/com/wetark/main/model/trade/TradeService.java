@@ -9,6 +9,8 @@ import com.wetark.main.model.event.EventRepository;
 import com.wetark.main.model.matchedTrade.MatchedTrade;
 import com.wetark.main.model.user.User;
 import com.wetark.main.model.user.UserRepository;
+import com.wetark.main.model.user.notification.Notification;
+import com.wetark.main.model.user.notification.NotificationType;
 import com.wetark.main.payload.request.TradeRequest;
 import com.wetark.main.payload.response.PendingTradeResponse;
 import com.wetark.main.payload.response.userPortfolio.UserPortfolio;
@@ -18,6 +20,7 @@ import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class TradeService extends BaseService<Trade> {
@@ -58,6 +61,14 @@ public class TradeService extends BaseService<Trade> {
     }
 
     public Trade addTrade(TradeRequest tradeRequest, User user) throws CustomException {
+        if(tradeRequest.getInitialSize().multiply(tradeRequest.getPrice()).compareTo(user.getBalance().getAvailableBalance()) == 1){
+            user.getNotifications().add(new Notification(NotificationType.INSUFFICIENT_BALANCE, "Insufficient balance to invest for ₹" + tradeRequest.getInitialSize().multiply(tradeRequest.getPrice()),tradeRequest.getEvent_id()));
+            userRepository.save(user);
+            throw new CustomException(Errors.INSUFFICIENT_BALANCE, "400");
+        }
+        BigDecimal amountFlow = tradeRequest.getInitialSize().multiply(tradeRequest.getPrice());
+        user.getBalance().setAvailableBalance(user.getBalance().getAvailableBalance().subtract(amountFlow));
+        user.getBalance().setOnHoldBalance(user.getBalance().getOnHoldBalance().add(amountFlow));
         Event event = eventRepository.findById(tradeRequest.getEvent_id()).orElseThrow(()->new CustomException(Errors.EVENT_NOT_FOUND, "400"));
         Trade trade = tradeRequest.newTrade(user, event);
         return processTrade(trade);
@@ -105,45 +116,49 @@ public class TradeService extends BaseService<Trade> {
                     reqTrade.setSize(BigDecimal.ZERO);
                     reqTrade.setActive(false);
                 }
-                calculatePrice(event, reqTrade, matchingTrade);
+                MatchedTrade matchedTrade = new MatchedTrade(event, reqTrade, matchingTrade, matchSize);
+                event.getMatchedTrade().add(matchedTrade);
+                calculatePrice(event, matchedTrade);
 
-                if(reqTrade.getTradeType() == TradeType.YES) {
-                    event.getMatchedTrade().add(new MatchedTrade(event, reqTrade, matchingTrade, matchSize));
-                }else{
-                    event.getMatchedTrade().add(new MatchedTrade(event, matchingTrade, reqTrade, matchSize));
-                }
+                matchedTrade.newMatch();
+
                 tradesToSave.add(matchingTrade);
                 i++;
             }
             tradeRepository.saveAll(tradesToSave);
+            userRepository.saveAll(tradesToSave.stream().map(trade -> trade.getUser()).collect(Collectors.toList()));
         }
+        if(reqTrade.getActive() == true){
+            reqTrade.getUser().getNotifications().add(
+                    new Notification(
+                            NotificationType.TRADE_IN_PROCESS,
+                            "₹"+reqTrade.getPrice() +" * " + reqTrade.getSize() + " Qty " + reqTrade.getTradeType() + " trade in process for event: " + event.getTitle(),
+                            event.getId())
+            );
+        }
+        userRepository.save(reqTrade.getUser());
     }
 
-    private void calculatePrice(Event event, Trade reqTrade, Trade matchingTrade) {
-        switch (reqTrade.getTradeType()){
-            case YES:
-                price(event, matchingTrade, reqTrade);
-                break;
-            case NO:
-                price(event, reqTrade, matchingTrade);
-                break;
-        }
-    }
+    private void calculatePrice(Event event, MatchedTrade matchedTrade) {
+        BigDecimal yesPrice = BigDecimal.ZERO;
+        BigDecimal noPrice = BigDecimal.ZERO;
 
-    private void price(Event event, Trade noTrade, Trade yesTrade) {
-        if(yesTrade.getPrice().compareTo(event.getYesPrice())>0){
-            if(noTrade.getPrice().compareTo(event.getNoPrice())>0){
-                yesTrade.setPrice(event.getYesPrice());
-                noTrade.setPrice(event.getNoPrice());
+        if(matchedTrade.getYesTrade().getPrice().compareTo(event.getYesPrice())>0){
+            if(matchedTrade.getNoTrade().getPrice().compareTo(event.getNoPrice())>0){
+                yesPrice = event.getYesPrice();
+                noPrice = event.getNoPrice();
             } else {
-                yesTrade.setPrice(BigDecimal.TEN.subtract(noTrade.getPrice()));
-                event.setYesPrice(BigDecimal.TEN.subtract(noTrade.getPrice()));
-                event.setNoPrice(noTrade.getPrice());
+                yesPrice = BigDecimal.TEN.subtract(matchedTrade.getNoTrade().getPrice());
+                noPrice = matchedTrade.getNoTrade().getPrice();
             }
         }else {
-            noTrade.setPrice(BigDecimal.TEN.subtract(yesTrade.getPrice()));
-            event.setYesPrice(yesTrade.getPrice());
-            event.setNoPrice(BigDecimal.TEN.subtract(yesTrade.getPrice()));
+            yesPrice = matchedTrade.getYesTrade().getPrice();
+            noPrice = BigDecimal.TEN.subtract(matchedTrade.getYesTrade().getPrice());
         }
+
+        matchedTrade.setYesPrice(yesPrice);
+        matchedTrade.setNoPrice(noPrice);
+        event.setYesPrice(yesPrice);
+        event.setNoPrice(noPrice);
     }
 }

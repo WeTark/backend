@@ -2,6 +2,7 @@ package com.wetark.main.model.event;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.wetark.main.model.Base;
+import com.wetark.main.model.event.tag.Tag;
 import com.wetark.main.model.matchedTrade.MatchedTrade;
 import com.wetark.main.model.user.User;
 import org.hibernate.annotations.CreationTimestamp;
@@ -37,8 +38,9 @@ public class Event extends Base {
     @Lob
     private String description;
 
-    @ElementCollection
-    private List<String> tags = new ArrayList<>();
+
+    @ManyToMany(cascade = CascadeType.ALL, mappedBy = "events")
+    private Set<Tag> tags = new HashSet<>();
 
     @JsonIgnore
     @ManyToMany(cascade = CascadeType.ALL)
@@ -139,11 +141,11 @@ public class Event extends Base {
         this.description = description;
     }
 
-    public List<String> getTags() {
+    public Set<Tag> getTags() {
         return tags;
     }
 
-    public void setTags(List<String> tags) {
+    public void setTags(Set<Tag> tags) {
         this.tags = tags;
     }
 
