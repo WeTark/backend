@@ -51,6 +51,8 @@ public class User extends Base {
 	@Email
 	private String email;
 
+	private String rocketChatToken;
+
 	@JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
 	@NotBlank
 	@Size(max = 120)
@@ -64,7 +66,7 @@ public class User extends Base {
 	private Set<Role> roles = new HashSet<>();
 
 	@OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
-	private Balance balance;
+	private Balance balance = new Balance();
 
 	@JsonIgnore
 	@OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
@@ -83,6 +85,14 @@ public class User extends Base {
 		this.username = username;
 		this.email = email;
 		this.password = password;
+	}
+
+	public String getRocketChatToken() {
+		return rocketChatToken;
+	}
+
+	public void setRocketChatToken(String rocketChatToken) {
+		this.rocketChatToken = rocketChatToken;
 	}
 
 	public Set<Notification> getNotifications() {
