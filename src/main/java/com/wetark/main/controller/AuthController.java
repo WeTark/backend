@@ -1,5 +1,10 @@
 package com.wetark.main.controller;
 
+import com.wetark.main.helper.rocketChat.payload.response.RCLoginResponse;
+import com.wetark.main.helper.rocketChat.payload.request.RCLoginUser;
+import com.wetark.main.helper.rocketChat.payload.response.RCRegResponse;
+import com.wetark.main.helper.rocketChat.payload.request.RCRegisterUser;
+import com.wetark.main.helper.rocketChat.RocketChatHelper;
 import com.wetark.main.model.user.User;
 import com.wetark.main.model.user.UserRepository;
 import com.wetark.main.model.user.role.ERole;
@@ -22,7 +27,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -46,6 +50,9 @@ public class AuthController {
 
 	@Autowired
 	JwtUtils jwtUtils;
+
+	@Autowired
+	RocketChatHelper rocketChatHelper;
 
 	@PostMapping("/signin")
 	public ResponseEntity<?> authenticateUser(@Valid @RequestBody LoginRequest loginRequest) {
@@ -116,7 +123,23 @@ public class AuthController {
 				}
 			});
 		}
+		RCRegResponse rcRegResponse = rocketChatHelper.CreateUser(
+				new RCRegisterUser(
+					user.getUsername(),
+					user.getEmail(),
+					user.getEmail(),
+					user.getFirstName()+" "+user.getLastName()
+				)
+		);
+		if(rcRegResponse.getSuccess() == false){
+			return ResponseEntity
+					.badRequest()
+					.body(new MessageResponse(rcRegResponse.getError()));
+		}
 
+		RCLoginResponse rcLoginResponse = rocketChatHelper.LoginUser(new RCLoginUser(user.getUsername(), user.getEmail()));
+
+		user.setRocketChatToken(rcLoginResponse.getData().getAuthToken());
 		user.setRoles(roles);
 		userRepository.save(user);
 

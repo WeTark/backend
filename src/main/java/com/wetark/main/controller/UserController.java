@@ -3,6 +3,7 @@ package com.wetark.main.controller;
 import com.wetark.main.model.trade.TradeService;
 import com.wetark.main.model.user.User;
 import com.wetark.main.model.user.balance.Balance;
+import com.wetark.main.model.user.notification.Notification;
 import com.wetark.main.payload.response.userPortfolio.UserPortfolio;
 import com.wetark.main.payload.response.userPortfolio.UserPortfolioResponse;
 import com.wetark.main.security.services.UserDetailsImpl;
@@ -36,5 +37,12 @@ public class UserController {
     public Balance getUserBalance(){
         User user = ((UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getUser();
         return user.getBalance();
+    }
+
+    @GetMapping("/notification")
+    @PreAuthorize("hasRole('USER')")
+    public Set<Notification> getUserNotification(){
+        User user = ((UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getUser();
+        return user.getNotifications();
     }
 }
