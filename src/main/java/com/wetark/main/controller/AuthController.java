@@ -123,23 +123,24 @@ public class AuthController {
 				}
 			});
 		}
-		RCRegResponse rcRegResponse = rocketChatHelper.CreateUser(
-				new RCRegisterUser(
-					user.getUsername(),
-					user.getEmail(),
-					user.getEmail(),
-					user.getFirstName()+" "+user.getLastName()
-				)
-		);
-		if(rcRegResponse.getSuccess() == false){
-			return ResponseEntity
-					.badRequest()
-					.body(new MessageResponse(rcRegResponse.getError()));
-		}
 
-		RCLoginResponse rcLoginResponse = rocketChatHelper.LoginUser(new RCLoginUser(user.getUsername(), user.getEmail()));
-
-		user.setRocketChatToken(rcLoginResponse.getData().getAuthToken());
+//		RCRegResponse rcRegResponse = rocketChatHelper.CreateUser(
+//				new RCRegisterUser(
+//					user.getUsername(),
+//					user.getEmail(),
+//					user.getEmail(),
+//					user.getFirstName()+" "+user.getLastName()
+//				)
+//		);
+//		if(rcRegResponse.getSuccess() == false){
+//			return ResponseEntity
+//					.badRequest()
+//					.body(new MessageResponse(rcRegResponse.getError()));
+//		}
+//
+//		RCLoginResponse rcLoginResponse = rocketChatHelper.LoginUser(new RCLoginUser(user.getUsername(), user.getEmail()));
+//
+//		user.setRocketChatToken(rcLoginResponse.getData().getAuthToken());
 		user.setRoles(roles);
 		userRepository.save(user);
 
