@@ -71,7 +71,7 @@ public class EventService extends BaseService<Event> {
         Event personalEvent = new Event();
         personalEvent.setTitle(event.titleWithVariable());
         personalEvent.setDescription(event.getDescription());
-        personalEvent.setTags(event.getTags());
+//        personalEvent.setTags(event.getTags());
         personalEvent.setPicture(event.getPicture());
         personalEvent.setExpireAt(event.expireAt);
 
