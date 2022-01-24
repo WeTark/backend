@@ -10,6 +10,7 @@ import com.wetark.main.model.user.notification.Notification;
 import com.wetark.main.model.user.notification.NotificationType;
 import com.wetark.main.model.user.order.Order;
 import com.wetark.main.model.user.role.Role;
+import lombok.Builder;
 import org.hibernate.annotations.GenericGenerator;
 
 import javax.persistence.*;
@@ -34,19 +35,15 @@ public class User extends Base {
 	@GenericGenerator(name = generatorName, strategy = "uuid")
 	private String id;
 
-	@NotBlank
-	@Size(max = 30)
-	private String firstName;
+	@Size(max = 50)
+	private String name;
 
-	@NotBlank
-	@Size(max = 30)
-	private String lastName;
-
-	@NotBlank
 	@Size(max = 50)
 	private String username;
 
-	@NotBlank
+	@Size(max = 50)
+	private String phoneNo;
+
 	@Size(max = 50)
 	@Email
 	private String email;
@@ -54,7 +51,6 @@ public class User extends Base {
 	private String rocketChatToken;
 
 	@JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
-	@NotBlank
 	@Size(max = 120)
 	private String password;
 
@@ -77,14 +73,11 @@ public class User extends Base {
 	private Set<Notification> notifications = new HashSet<>();
 
 	public User() {
+
 	}
 
-	public User(String firstName, String lastName, String username, String email, String password) {
-		this.firstName = firstName;
-		this.lastName = lastName;
-		this.username = username;
-		this.email = email;
-		this.password = password;
+	public User(String phoneNo) {
+		this.phoneNo = phoneNo;
 	}
 
 	public String getRocketChatToken() {
@@ -117,22 +110,6 @@ public class User extends Base {
 
 	public void setBalance(Balance balance) {
 		this.balance = balance;
-	}
-
-	public String getFirstName() {
-		return firstName;
-	}
-
-	public void setFirstName(String firstName) {
-		this.firstName = firstName;
-	}
-
-	public String getLastName() {
-		return lastName;
-	}
-
-	public void setLastName(String lastName) {
-		this.lastName = lastName;
 	}
 
 	public String getId() {

@@ -7,6 +7,7 @@ import com.wetark.main.helper.rocketChat.payload.request.RCRegisterUser;
 import com.wetark.main.helper.rocketChat.RocketChatHelper;
 import com.wetark.main.model.user.User;
 import com.wetark.main.model.user.UserRepository;
+import com.wetark.main.model.user.UserService;
 import com.wetark.main.model.user.role.ERole;
 import com.wetark.main.model.user.role.Role;
 import com.wetark.main.model.user.role.RoleRepository;
@@ -14,9 +15,11 @@ import com.wetark.main.payload.request.LoginRequest;
 import com.wetark.main.payload.request.SignupRequest;
 import com.wetark.main.payload.response.JwtResponse;
 import com.wetark.main.payload.response.MessageResponse;
+import com.wetark.main.payload.response.user.UserLoginResponse;
 import com.wetark.main.security.jwt.JwtUtils;
 import com.wetark.main.security.services.UserDetailsImpl;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -29,6 +32,7 @@ import org.springframework.web.bind.annotation.*;
 import javax.validation.Valid;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -54,6 +58,9 @@ public class AuthController {
 	@Autowired
 	RocketChatHelper rocketChatHelper;
 
+	@Autowired
+	UserService userService;
+
 	@PostMapping("/signin")
 	public ResponseEntity<?> authenticateUser(@Valid @RequestBody LoginRequest loginRequest) {
 
@@ -75,6 +82,12 @@ public class AuthController {
 												 roles));
 	}
 
+	@GetMapping("/signin/{phoneNo}")
+	public ResponseEntity<?> signInByPhoneNo(@PathVariable String phoneNo){
+		UserLoginResponse userLoginResponse = userService.signInByPhoneNo(phoneNo);
+		return ResponseEntity.ok(userLoginResponse);
+	}
+
 	@PostMapping("/signup")
 	public ResponseEntity<?> registerUser(@Valid @RequestBody SignupRequest signUpRequest) {
 		if (userRepository.existsByUsername(signUpRequest.getUsername())) {
@@ -90,9 +103,10 @@ public class AuthController {
 		}
 
 		// Create new user's account
-		User user = new User(signUpRequest.getFirstName(), signUpRequest.getLastName(), signUpRequest.getUsername(),
-							 signUpRequest.getEmail(),
-							 encoder.encode(signUpRequest.getPassword()));
+		User user = new User();
+//		User user = new User(signUpRequest.getFirstName(), signUpRequest.getLastName(), signUpRequest.getUsername(),
+//							 signUpRequest.getEmail(),
+//							 encoder.encode(signUpRequest.getPassword()));
 
 		Set<String> strRoles = signUpRequest.getRole();
 		Set<Role> roles = new HashSet<>();
