@@ -5,6 +5,7 @@ import com.wetark.main.helper.rocketChat.payload.request.RCLoginUser;
 import com.wetark.main.helper.rocketChat.payload.response.RCRegResponse;
 import com.wetark.main.helper.rocketChat.payload.request.RCRegisterUser;
 import com.wetark.main.helper.rocketChat.RocketChatHelper;
+import com.wetark.main.helper.twoFactor.payload.TwoFactorVerifyOtpResponse;
 import com.wetark.main.model.user.User;
 import com.wetark.main.model.user.UserRepository;
 import com.wetark.main.model.user.UserService;
@@ -77,7 +78,7 @@ public class AuthController {
 
 		return ResponseEntity.ok(new JwtResponse(jwt,
 												 userDetails.getId(), 
-												 userDetails.getUsername(), 
+												 userDetails.getUsername(),
 												 userDetails.getEmail(), 
 												 roles));
 	}
@@ -88,88 +89,98 @@ public class AuthController {
 		return ResponseEntity.ok(userLoginResponse);
 	}
 
+	@GetMapping("/verify-otp/{otp}/{sessionId}")
+	public ResponseEntity<?> verifyOtp(@PathVariable String otp, @PathVariable String sessionId){
+		TwoFactorVerifyOtpResponse twoFactorVerifyOtpResponse = userService.verifyOtp(otp, sessionId);
+		return ResponseEntity.ok(twoFactorVerifyOtpResponse);
+	}
+
 	@PostMapping("/signup")
 	public ResponseEntity<?> registerUser(@Valid @RequestBody SignupRequest signUpRequest) {
-		if (userRepository.existsByUsername(signUpRequest.getUsername())) {
-			return ResponseEntity
-					.badRequest()
-					.body(new MessageResponse("Error: Username is already taken!"));
-		}
-
 		if (userRepository.existsByEmail(signUpRequest.getEmail())) {
 			return ResponseEntity
 					.badRequest()
 					.body(new MessageResponse("Error: Email is already in use!"));
 		}
 
-		// Create new user's account
-		User user = new User();
-//		User user = new User(signUpRequest.getFirstName(), signUpRequest.getLastName(), signUpRequest.getUsername(),
-//							 signUpRequest.getEmail(),
-//							 encoder.encode(signUpRequest.getPassword()));
+		Optional<User> userOptional = userRepository.findByPhoneNo(signUpRequest.getPhoneNo());
+		if(userOptional.isPresent()){
+			User user = userOptional.get();
+			if(user.getPassword() != null){
+				return ResponseEntity
+						.badRequest()
+						.body(new MessageResponse("Error: PhoneNo is already in use!"));
+			}
 
-		Set<String> strRoles = signUpRequest.getRole();
-		Set<Role> roles = new HashSet<>();
+			user.setName(signUpRequest.getName());
+			user.setEmail(signUpRequest.getEmail());
+			user.setPassword(encoder.encode(signUpRequest.getPassword()));
 
-		if (strRoles == null) {
-			Role userRole = roleRepository.findByName(ERole.ROLE_USER)
-					.orElseThrow(() -> new RuntimeException("Error: Role is not found."));
-			roles.add(userRole);
-		} else {
-			strRoles.forEach(role -> {
-				switch (role) {
-				case "admin":
-					Role adminRole = roleRepository.findByName(ERole.ROLE_ADMIN)
-							.orElseThrow(() -> new RuntimeException("Error: Role is not found."));
-					roles.add(adminRole);
+			Set<String> strRoles = signUpRequest.getRole();
+			Set<Role> roles = new HashSet<>();
 
-					break;
-				case "mod":
-					Role modRole = roleRepository.findByName(ERole.ROLE_MODERATOR)
-							.orElseThrow(() -> new RuntimeException("Error: Role is not found."));
-					roles.add(modRole);
+			if (strRoles == null) {
+				Role userRole = roleRepository.findByName(ERole.ROLE_USER)
+						.orElseThrow(() -> new RuntimeException("Error: Role is not found."));
+				roles.add(userRole);
+			} else {
+				strRoles.forEach(role -> {
+					switch (role) {
+						case "admin":
+							Role adminRole = roleRepository.findByName(ERole.ROLE_ADMIN)
+									.orElseThrow(() -> new RuntimeException("Error: Role is not found."));
+							roles.add(adminRole);
 
-					break;
-				default:
-					Role userRole = roleRepository.findByName(ERole.ROLE_USER)
-							.orElseThrow(() -> new RuntimeException("Error: Role is not found."));
-					roles.add(userRole);
-				}
-			});
+							break;
+						case "mod":
+							Role modRole = roleRepository.findByName(ERole.ROLE_MODERATOR)
+									.orElseThrow(() -> new RuntimeException("Error: Role is not found."));
+							roles.add(modRole);
+
+							break;
+						default:
+							Role userRole = roleRepository.findByName(ERole.ROLE_USER)
+									.orElseThrow(() -> new RuntimeException("Error: Role is not found."));
+							roles.add(userRole);
+					}
+				});
+			}
+
+			user.setRoles(roles);
+
+			// Create new rc user's account
+			RCRegResponse rcRegResponse = rocketChatHelper.CreateUser(
+				new RCRegisterUser(
+					user.getPhoneNo(),
+					user.getEmail(),
+					user.getEmail(),
+					user.getName()
+				)
+			);
+			if(rcRegResponse.getSuccess() == false){
+				return ResponseEntity
+						.badRequest()
+						.body(new MessageResponse(rcRegResponse.getError()));
+			}
+
+			userRepository.save(user);
+			Authentication authentication = authenticationManager.authenticate(
+					new UsernamePasswordAuthenticationToken(signUpRequest.getPhoneNo(), signUpRequest.getPassword()));
+			String jwt = jwtUtils.generateJwtToken(authentication);
+			UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
+			List<String> roleList = userDetails.getAuthorities().stream()
+					.map(item -> item.getAuthority())
+					.collect(Collectors.toList());
+			return ResponseEntity.ok(new JwtResponse(jwt,
+					user.getId(),
+					user.getPhoneNo(),
+					user.getEmail(),
+					roleList
+			));
 		}
-//		RCRegResponse rcRegResponse = rocketChatHelper.CreateUser(
-//				new RCRegisterUser(
-//					user.getUsername(),
-//					user.getEmail(),
-//					user.getEmail(),
-//					user.getFirstName()+" "+user.getLastName()
-//				)
-//		);
-//		if(rcRegResponse.getSuccess() == false){
-//			return ResponseEntity
-//					.badRequest()
-//					.body(new MessageResponse(rcRegResponse.getError()));
-//		}
-//
-//		RCLoginResponse rcLoginResponse = rocketChatHelper.LoginUser(new RCLoginUser(user.getUsername(), user.getEmail()));
-//
-//		user.setRocketChatToken(rcLoginResponse.getData().getAuthToken());
-		user.setRoles(roles);
-		userRepository.save(user);
-
-		Authentication authentication = authenticationManager.authenticate(
-				new UsernamePasswordAuthenticationToken(signUpRequest.getUsername(), signUpRequest.getPassword()));
-		String jwt = jwtUtils.generateJwtToken(authentication);
-		UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
-		List<String> roleList = userDetails.getAuthorities().stream()
-				.map(item -> item.getAuthority())
-				.collect(Collectors.toList());
-		return ResponseEntity.ok(new JwtResponse(jwt,
-				user.getId(),
-				user.getUsername(),
-				user.getEmail(),
-				roleList
-				));
+		return ResponseEntity
+				.badRequest()
+				.body(new MessageResponse("Error:User with given phoneNo does not exist!"));
 	}
 
 	@GetMapping("/me")

@@ -38,6 +38,9 @@ public class Event extends Base {
     @Lob
     private String description;
 
+    private String sourceOfSettlement;
+
+    private String rcChannelId;
 
     @ManyToMany(cascade = CascadeType.ALL, mappedBy = "events")
     private Set<Tag> tags = new HashSet<>();
@@ -63,16 +66,10 @@ public class Event extends Base {
     private String picture;
 
     @Temporal(TemporalType.TIMESTAMP)
+    public Date startAt;
+
+    @Temporal(TemporalType.TIMESTAMP)
     public Date expireAt;
-
-    public Date createdAt;
-
-    public Date getCreatedAt() {
-        return createdAt;
-    }
-    public void setCreatedAt(Date createdAt) {
-        super.setCreatedAt(createdAt);
-    }
 
     @Override
     public String getId() {
@@ -149,6 +146,14 @@ public class Event extends Base {
         this.tags = tags;
     }
 
+    public Date getStartAt() {
+        return startAt;
+    }
+
+    public void setStartAt(Date startAt) {
+        this.startAt = startAt;
+    }
+
     public Date getExpireAt() {
         return expireAt;
     }
@@ -179,5 +184,21 @@ public class Event extends Base {
 
     public void setPicture(String picture) {
         this.picture = picture;
+    }
+
+    public String getRcChannelId() {
+        return rcChannelId;
+    }
+
+    public void setRcChannelId(String rcChannelId) {
+        this.rcChannelId = rcChannelId;
+    }
+
+    public String getSourceOfSettlement() {
+        return sourceOfSettlement;
+    }
+
+    public void setSourceOfSettlement(String sourceOfSettlement) {
+        this.sourceOfSettlement = sourceOfSettlement;
     }
 }

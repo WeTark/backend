@@ -1,7 +1,9 @@
 package com.wetark.main.helper.rocketChat;
 
 import com.wetark.main.helper.rocketChat.payload.request.RCLoginUser;
+import com.wetark.main.helper.rocketChat.payload.request.RCNewEvent;
 import com.wetark.main.helper.rocketChat.payload.request.RCRegisterUser;
+import com.wetark.main.helper.rocketChat.payload.response.RCEventResponse;
 import com.wetark.main.helper.rocketChat.payload.response.RCLoginResponse;
 import com.wetark.main.helper.rocketChat.payload.response.RCRegResponse;
 import org.springframework.beans.factory.annotation.Value;
@@ -16,6 +18,12 @@ import reactor.netty.http.client.HttpClient;
 @Service
 public class RocketChatHelper {
     private final WebClient webClient;
+
+    @Value("${rocket.chat.username}")
+    private String username;
+
+    @Value("${rocket.chat.password}")
+    private String password;
 
     public RocketChatHelper(@Value("https://chat.wetark.in")String baseUrl) {
         this.webClient = WebClient.builder()
@@ -48,5 +56,18 @@ public class RocketChatHelper {
                     return clientResponse.bodyToMono( RCLoginResponse.class );
                 }).block();
         return response;
+    }
+
+    public RCEventResponse CreateEvent(String eventName){
+        RCLoginResponse rcLoginResponse = LoginUser(new RCLoginUser(username, password));
+        return webClient.post().uri("/api/v1/channels.create")
+                .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .header("X-Auth-Token", rcLoginResponse.getData().getAuthToken())
+                .header("X-User-Id", rcLoginResponse.getData().getUserId())
+                .body(Mono.just(RCNewEvent.builder().name(eventName).build()), RCNewEvent.class)
+                .exchange()
+                .flatMap( clientResponse -> {
+                    return clientResponse.bodyToMono( RCEventResponse.class );
+                }).block();
     }
 }

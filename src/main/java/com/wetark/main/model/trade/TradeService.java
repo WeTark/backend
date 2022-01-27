@@ -47,6 +47,11 @@ public class TradeService extends BaseService<Trade> {
         return new ArrayList<>(userPortfolioResponseMap.values());
     }
 
+    public List<PendingTradeResponse> pendingTrade(String eventId, TradeType tradeType) throws CustomException {
+        Event event = eventRepository.findById(eventId).orElseThrow(()->new CustomException(Errors.EVENT_NOT_FOUND, "400"));
+        return tradeRepository.getPendingTrade(tradeType, event);
+    }
+
     public Map<String,  List<PendingTradeResponse>> topPendingTrade(String eventId, String page, String size) throws CustomException {
         Event event = eventRepository.findById(eventId).orElseThrow(()->new CustomException(Errors.EVENT_NOT_FOUND, "400"));
         Map<String, List<PendingTradeResponse>> responseData = new HashMap<>();

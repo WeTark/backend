@@ -2,6 +2,7 @@ package com.wetark.main.model.user;
 
 import com.wetark.main.helper.twoFactor.TwoFactorHelper;
 import com.wetark.main.helper.twoFactor.payload.TwoFactorSendOtpResponse;
+import com.wetark.main.helper.twoFactor.payload.TwoFactorVerifyOtpResponse;
 import com.wetark.main.payload.response.user.UserLoginResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -31,6 +32,10 @@ public class UserService {
         });
     }
 
+    public TwoFactorVerifyOtpResponse verifyOtp(String otp, String sessionId){
+        return twoFactorHelper.verifyOTP(sessionId, otp);
+    }
+
     private UserLoginResponse sendOtp(String phoneNo){
         UserLoginResponse userLoginResponse = UserLoginResponse.builder()
                 .isUserExist(false)
@@ -41,7 +46,4 @@ public class UserService {
         return userLoginResponse;
     }
 
-    private void verifyOtp(){
-
-    }
 }

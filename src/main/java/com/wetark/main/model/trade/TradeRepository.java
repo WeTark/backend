@@ -18,6 +18,8 @@ public interface TradeRepository extends BaseRepository<Trade> {
     @Query("Select ord from Trade ord where ord.event = :event and ord.tradeType = :tradeType and ord.isActive = true order by ord.price desc, ord.createdAt asc")
     List<Trade> getAllTradesSortedByPriceAndActive(@Param("tradeType") TradeType tradeType, @Param("event") Event event);
 
+    @Query("Select trd.price as price, sum(trd.size) as size from Trade trd where trd.event = :event and trd.tradeType = :tradeType and trd.isActive = true group by trd.price")
+    List<PendingTradeResponse> getPendingTrade(@Param("tradeType") TradeType tradeType, @Param("event") Event event);
 
     @Query("Select trd from Trade trd where trd.event = :event and trd.tradeType = :tradeType and trd.isActive = true order by trd.price desc")
     List<PendingTradeResponse> getTopPendingTrade(@Param("tradeType") TradeType tradeType, @Param("event") Event event, Pageable pageable);

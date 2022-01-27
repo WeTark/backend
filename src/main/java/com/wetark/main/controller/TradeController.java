@@ -4,6 +4,7 @@ import com.wetark.main.exception.CustomException;
 import com.wetark.main.kafka.KafKaProducerService;
 import com.wetark.main.model.trade.Trade;
 import com.wetark.main.model.trade.TradeService;
+import com.wetark.main.model.trade.TradeType;
 import com.wetark.main.model.user.User;
 import com.wetark.main.payload.request.TradeRequest;
 import com.wetark.main.payload.response.PendingTradeResponse;
@@ -37,6 +38,12 @@ public class TradeController{
     @PreAuthorize("hasRole('USER')")
     public Map<String,  List<PendingTradeResponse>> fetchTopPendingTrade(@RequestParam String eventId, @RequestParam String page,@RequestParam String size) throws CustomException {
         return tradeService.topPendingTrade(eventId, page, size);
+    }
+
+    @GetMapping("/pending/summary")
+    @PreAuthorize("hasRole('USER')")
+    public List<PendingTradeResponse> fetchPendingTrade(@RequestParam String eventId, @RequestParam TradeType tradeType) throws CustomException {
+        return tradeService.pendingTrade(eventId, tradeType);
     }
 
 

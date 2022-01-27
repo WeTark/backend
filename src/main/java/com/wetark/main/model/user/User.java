@@ -26,7 +26,7 @@ import static com.wetark.main.helper.UUIDGenerator.generatorName;
 @Entity
 @Table(	name = "users", 
 		uniqueConstraints = { 
-			@UniqueConstraint(columnNames = "username"),
+			@UniqueConstraint(columnNames = "phoneNo"),
 			@UniqueConstraint(columnNames = "email") 
 		})
 public class User extends Base {
@@ -39,16 +39,11 @@ public class User extends Base {
 	private String name;
 
 	@Size(max = 50)
-	private String username;
-
-	@Size(max = 50)
 	private String phoneNo;
 
 	@Size(max = 50)
 	@Email
 	private String email;
-
-	private String rocketChatToken;
 
 	@JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
 	@Size(max = 120)
@@ -80,12 +75,20 @@ public class User extends Base {
 		this.phoneNo = phoneNo;
 	}
 
-	public String getRocketChatToken() {
-		return rocketChatToken;
+	public String getName() {
+		return name;
 	}
 
-	public void setRocketChatToken(String rocketChatToken) {
-		this.rocketChatToken = rocketChatToken;
+	public void setName(String name) {
+		this.name = name;
+	}
+
+	public String getPhoneNo() {
+		return phoneNo;
+	}
+
+	public void setPhoneNo(String phoneNo) {
+		this.phoneNo = phoneNo;
 	}
 
 	public Set<Notification> getNotifications() {
@@ -118,14 +121,6 @@ public class User extends Base {
 
 	public void setId(String id) {
 		this.id = id;
-	}
-
-	public String getUsername() {
-		return username;
-	}
-
-	public void setUsername(String username) {
-		this.username = username;
 	}
 
 	public String getEmail() {

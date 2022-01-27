@@ -4,12 +4,15 @@ import com.wetark.main.constant.Errors;
 import com.wetark.main.exception.CustomException;
 import com.wetark.main.helper.FileUploadUtil;
 import com.wetark.main.helper.PageHelper;
+import com.wetark.main.helper.rocketChat.RocketChatHelper;
+import com.wetark.main.helper.rocketChat.payload.response.RCEventResponse;
 import com.wetark.main.model.BaseService;
 import com.wetark.main.model.event.tag.Tag;
 import com.wetark.main.model.event.tag.TagRepository;
 import com.wetark.main.model.user.User;
 import com.wetark.main.payload.request.CreatePersonalEventRequest;
 import com.wetark.main.payload.request.EventRequest;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
@@ -25,6 +28,9 @@ import java.util.stream.Collectors;
 
 @Service
 public class EventService extends BaseService<Event> {
+    @Autowired
+    private RocketChatHelper rocketChatHelper;
+
     private final EventRepository eventRepository;
     private final TagRepository tagRepository;
 
@@ -37,7 +43,11 @@ public class EventService extends BaseService<Event> {
     @Transactional
     public Event add(EventRequest entity){
         entity.setTags(entity.getTags().stream().map(tag -> tagRepository.findByNameIgnoreCase(tag.getName()).orElseGet(()->tag)).collect(Collectors.toSet()));
-        return eventRepository.save(entity.createEvent());
+        Event event = eventRepository.save(entity.createEvent());
+        RCEventResponse rcEventResponse = rocketChatHelper.CreateEvent(event.getId());
+        event.setRcChannelId(rcEventResponse.getChannel().get_id());
+        eventRepository.save(event);
+        return event;
     }
 
     public Event addNonPrivateEvent(Event event, MultipartFile multipartFile) throws IOException {
@@ -50,6 +60,12 @@ public class EventService extends BaseService<Event> {
 
         return event;
     }
+
+    @Transactional
+    public List<Event> findTrendingNonPrivate(String page, String size) throws CustomException {
+        return eventRepository.findByIsPrivateOrderByCreatedAtDesc(false, PageHelper.pageable(page, size)).getContent();
+    }
+
     @Transactional
     public List<Event> findAllNonPrivate(String page, String size, String tagName) throws CustomException {
         return eventRepository.findByTagsNameAndIsPrivateOrderByCreatedAtDesc(tagName, false, PageHelper.pageable(page, size)).getContent();
@@ -80,9 +96,5 @@ public class EventService extends BaseService<Event> {
         personalEvent.setEventVariableMap(createPersonalEventRequest.getEventVariableMap());
 
         return eventRepository.save(personalEvent).getId();
-    }
-
-    public List<Tag> findAllTag(String page, String size) {
-        return tagRepository.findAll(PageHelper.pageable(page,size)).getContent();
     }
 }

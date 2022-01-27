@@ -35,6 +35,9 @@ public class Tag extends Base {
     @Column(nullable = false)
     private String name;
 
+    private String imageUrl;
+    private Boolean isHighlight = false;
+
     @JsonIgnore
     @ManyToMany(cascade = CascadeType.ALL)
     private Set<Event> events = new HashSet<>();
@@ -63,5 +66,21 @@ public class Tag extends Base {
 
     public void setEvents(Set<Event> events) {
         this.events = events;
+    }
+
+    public String getImageUrl() {
+        return imageUrl;
+    }
+
+    public void setImageUrl(String imageUrl) {
+        this.imageUrl = imageUrl;
+    }
+
+    public Boolean getHighlight() {
+        return isHighlight;
+    }
+
+    public void setHighlight(Boolean highlight) {
+        isHighlight = highlight;
     }
 }

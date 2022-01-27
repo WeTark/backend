@@ -14,4 +14,5 @@ import java.util.Set;
 public interface EventRepository extends BaseRepository<Event> {
     List<Event> findByUserOrderByCreatedAtDesc(User user, Pageable pageable);
     Page<Event> findByTagsNameAndIsPrivateOrderByCreatedAtDesc(String name, Boolean isPrivate, Pageable pageable);
+    Page<Event> findByIsPrivateOrderByCreatedAtDesc(Boolean isPrivate, Pageable pageable);
 }

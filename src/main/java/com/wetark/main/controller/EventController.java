@@ -58,15 +58,15 @@ public class EventController{
     }
 
     @PreAuthorize("hasRole('USER')")
-    @GetMapping("/tag/all")
-    public List<Tag> findAllTag(String page, String size) throws CustomException {
-        return eventService.findAllTag(page, size);
-    }
-
-    @PreAuthorize("hasRole('USER')")
     @GetMapping("/all")
     public List<Event> findAll(String page, String size, @RequestParam(required = false) String tag) throws CustomException {
         return eventService.findAllNonPrivate(page, size, tag);
+    }
+
+    @PreAuthorize("hasRole('USER')")
+    @GetMapping("/all/trending")
+    public List<Event> findAllTrending(String page, String size) throws CustomException {
+        return eventService.findTrendingNonPrivate(page, size);
     }
 
     @PreAuthorize("hasRole('USER')")
